@@ -1,0 +1,242 @@
+---
+import PhotoCard from './PhotoCard.astro';
+
+export interface Photo {
+  slug: string;
+  src: string;
+  title: string;
+  width?: number;
+  height?: number;
+}
+
+export interface Props {
+  photos: Photo[];
+}
+
+const { photos } = Astro.props;
+---
+
+<div class="gallery-container">
+  <div class="gallery-header">
+    <h1>Photos</h1>
+    <div class="gallery-controls">
+      <button id="select-all" class="control-btn">Select All</button>
+      <button id="deselect-all" class="control-btn">Deselect All</button>
+      <button id="download-selected" class="download-btn" disabled>
+        Download Selected (<span id="selected-count">0</span>)
+      </button>
+    </div>
+  </div>
+  
+  <div class="gallery-grid">
+    {photos.map((photo) => (
+      <PhotoCard 
+        src={photo.src}
+        slug={photo.slug}
+        title={photo.title}
+        width={photo.width}
+        height={photo.height}
+      />
+    ))}
+  </div>
+</div>
+
+<script>
+  // Selection state management
+  const selectedPhotos = new Set<string>();
+  
+  // DOM elements
+  const selectAllBtn = document.getElementById('select-all') as HTMLButtonElement;
+  const deselectAllBtn = document.getElementById('deselect-all') as HTMLButtonElement;
+  const downloadBtn = document.getElementById('download-selected') as HTMLButtonElement;
+  const selectedCountSpan = document.getElementById('selected-count') as HTMLSpanElement;
+  const checkboxes = document.querySelectorAll('.photo-select') as NodeListOf<HTMLInputElement>;
+
+  // Update UI based on selection state
+  function updateUI() {
+    selectedCountSpan.textContent = selectedPhotos.size.toString();
+    downloadBtn.disabled = selectedPhotos.size === 0;
+    
+    if (selectedPhotos.size === 0) {
+      downloadBtn.textContent = 'Download Selected (0)';
+    } else {
+      downloadBtn.innerHTML = `Download Selected (<span id="selected-count">${selectedPhotos.size}</span>)`;
+    }
+  }
+
+  // Handle individual checkbox changes
+  checkboxes.forEach(checkbox => {
+    checkbox.addEventListener('change', (e) => {
+      const target = e.target as HTMLInputElement;
+      const slug = target.dataset.slug;
+      
+      if (!slug) return;
+      
+      if (target.checked) {
+        selectedPhotos.add(slug);
+      } else {
+        selectedPhotos.delete(slug);
+      }
+      
+      updateUI();
+    });
+  });
+
+  // Select all photos
+  selectAllBtn.addEventListener('click', () => {
+    checkboxes.forEach(checkbox => {
+      checkbox.checked = true;
+      const slug = checkbox.dataset.slug;
+      if (slug) selectedPhotos.add(slug);
+    });
+    updateUI();
+  });
+
+  // Deselect all photos
+  deselectAllBtn.addEventListener('click', () => {
+    checkboxes.forEach(checkbox => {
+      checkbox.checked = false;
+      const slug = checkbox.dataset.slug;
+      if (slug) selectedPhotos.delete(slug);
+    });
+    selectedPhotos.clear();
+    updateUI();
+  });
+
+  // Download selected photos
+  downloadBtn.addEventListener('click', async () => {
+    if (selectedPhotos.size === 0) return;
+    
+    const filenames = Array.from(selectedPhotos);
+    
+    try {
+      downloadBtn.disabled = true;
+      downloadBtn.textContent = 'Creating ZIP...';
+      
+      const response = await fetch('/api/zip', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ files: filenames }),
+      });
+      
+      if (!response.ok) {
+        throw new Error('Failed to create ZIP');
+      }
+      
+      const blob = await response.blob();
+      const url = URL.createObjectURL(blob);
+      
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `photos-${new Date().toISOString().split('T')[0]}.zip`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      
+      URL.revokeObjectURL(url);
+      
+    } catch (error) {
+      console.error('Download failed:', error);
+      alert('Failed to download photos. Please try again.');
+    } finally {
+      downloadBtn.disabled = false;
+      updateUI();
+    }
+  });
+</script>
+
+<style>
+  .gallery-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 20px;
+  }
+
+  .gallery-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 30px;
+    flex-wrap: wrap;
+    gap: 20px;
+  }
+
+  .gallery-header h1 {
+    margin: 0;
+    color: #1f2937;
+    font-size: 2rem;
+    font-weight: 700;
+  }
+
+  .gallery-controls {
+    display: flex;
+    gap: 12px;
+    align-items: center;
+    flex-wrap: wrap;
+  }
+
+  .control-btn {
+    padding: 8px 16px;
+    background: #f3f4f6;
+    border: 1px solid #d1d5db;
+    border-radius: 6px;
+    color: #374151;
+    font-size: 0.875rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s ease;
+  }
+
+  .control-btn:hover {
+    background: #e5e7eb;
+    border-color: #9ca3af;
+  }
+
+  .download-btn {
+    padding: 10px 20px;
+    background: #3b82f6;
+    border: none;
+    border-radius: 6px;
+    color: white;
+    font-size: 0.875rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+  }
+
+  .download-btn:hover:not(:disabled) {
+    background: #2563eb;
+    transform: translateY(-1px);
+  }
+
+  .download-btn:disabled {
+    background: #9ca3af;
+    cursor: not-allowed;
+    transform: none;
+  }
+
+  .gallery-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 24px;
+    margin-top: 30px;
+  }
+
+  @media (max-width: 768px) {
+    .gallery-header {
+      flex-direction: column;
+      align-items: stretch;
+    }
+    
+    .gallery-controls {
+      justify-content: center;
+    }
+    
+    .gallery-grid {
+      grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+      gap: 16px;
+    }
+  }
+</style>

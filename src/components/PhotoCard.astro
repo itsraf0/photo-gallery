@@ -1,0 +1,119 @@
+---
+import { Image } from 'astro:assets';
+
+export interface Props {
+  src: string;
+  slug: string;
+  title: string;
+  width?: number;
+  height?: number;
+}
+
+const { src, slug, title, width = 300, height = 300 } = Astro.props;
+---
+
+<div class="photo-card">
+  <div class="photo-container">
+    <a href={`/photos/${slug}`}>
+      <Image
+        src={src}
+        alt={title}
+        width={width}
+        height={height}
+        class="photo-thumbnail"
+        format="webp"
+        quality="mid"
+      />
+    </a>
+    <div class="photo-overlay">
+      <input
+        type="checkbox"
+        class="photo-select"
+        data-slug={slug}
+        id={`select-${slug}`}
+      />
+      <label for={`select-${slug}`} class="select-label">
+        <span class="sr-only">Select {title}</span>
+      </label>
+    </div>
+  </div>
+  <div class="photo-info">
+    <h3 class="photo-title">{title}</h3>
+  </div>
+</div>
+
+<style>
+  .photo-card {
+    position: relative;
+    background: white;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    overflow: hidden;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+  }
+
+  .photo-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
+  }
+
+  .photo-container {
+    position: relative;
+    overflow: hidden;
+  }
+
+  .photo-thumbnail {
+    width: 100%;
+    height: 300px;
+    object-fit: cover;
+    display: block;
+    transition: transform 0.2s ease;
+  }
+
+  .photo-container:hover .photo-thumbnail {
+    transform: scale(1.05);
+  }
+
+  .photo-overlay {
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    z-index: 10;
+  }
+
+  .photo-select {
+    width: 20px;
+    height: 20px;
+    opacity: 0.8;
+    cursor: pointer;
+    accent-color: #3b82f6;
+  }
+
+  .select-label {
+    cursor: pointer;
+  }
+
+  .photo-info {
+    padding: 12px 16px;
+  }
+
+  .photo-title {
+    margin: 0;
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: #374151;
+    text-transform: capitalize;
+  }
+
+  .sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
+  }
+</style>

@@ -1,0 +1,248 @@
+---
+import { Image } from 'astro:assets';
+import Layout from '../../layouts/Layout.astro';
+import { generatePhotoManifest, getPhotoBySlug } from '../../utils/photos';
+import type { GetStaticPaths } from 'astro';
+
+export const prerender = true;
+
+export const getStaticPaths: GetStaticPaths = () => {
+  const photos = generatePhotoManifest();
+  
+  return photos.map((photo) => ({
+    params: { slug: photo.slug },
+    props: { photo },
+  }));
+};
+
+const { photo } = Astro.props;
+
+if (!photo) {
+  return Astro.redirect('/gallery');
+}
+---
+
+<Layout title={`${photo.title} - Photo Gallery`}>
+  <main class="photo-detail">
+    <div class="photo-detail-container">
+      <div class="photo-detail-header">
+        <a href="/gallery" class="back-link">← Back to Gallery</a>
+        <h1 class="photo-title">{photo.title}</h1>
+      </div>
+      
+      <div class="photo-display">
+        <Image
+          src={photo.src}
+          alt={photo.title}
+          width={1200}
+          height={800}
+          class="photo-image"
+          format="webp"
+          quality="high"
+        />
+      </div>
+      
+      <div class="photo-info">
+        <div class="info-item">
+          <span class="info-label">Filename:</span>
+          <span class="info-value">{photo.filename}</span>
+        </div>
+      </div>
+      
+      <div class="photo-actions">
+        <a href="/gallery" class="action-btn secondary">Back to Gallery</a>
+        <button class="action-btn primary" id="download-single">
+          Download Original
+        </button>
+      </div>
+    </div>
+  </main>
+</Layout>
+
+<script define:vars={{ filename: photo.filename }}>
+  document.getElementById('download-single')?.addEventListener('click', async () => {
+    const btn = document.getElementById('download-single');
+    if (!btn) return;
+    
+    try {
+      btn.textContent = 'Downloading...';
+      btn.disabled = true;
+      
+      const response = await fetch('/api/zip', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ files: [filename] }),
+      });
+      
+      if (!response.ok) {
+        throw new Error('Failed to download');
+      }
+      
+      const blob = await response.blob();
+      const url = URL.createObjectURL(blob);
+      
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = filename;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      
+      URL.revokeObjectURL(url);
+      
+    } catch (error) {
+      console.error('Download failed:', error);
+      alert('Failed to download photo. Please try again.');
+    } finally {
+      btn.textContent = 'Download Original';
+      btn.disabled = false;
+    }
+  });
+</script>
+
+<style>
+  .photo-detail {
+    min-height: 100vh;
+    background: #f9fafb;
+  }
+
+  .photo-detail-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 20px;
+  }
+
+  .photo-detail-header {
+    margin-bottom: 30px;
+  }
+
+  .back-link {
+    display: inline-block;
+    margin-bottom: 16px;
+    color: #6b7280;
+    font-size: 0.875rem;
+    text-decoration: none;
+    transition: color 0.2s ease;
+  }
+
+  .back-link:hover {
+    color: #3b82f6;
+    text-decoration: underline;
+  }
+
+  .photo-title {
+    margin: 0;
+    font-size: 2.25rem;
+    font-weight: 700;
+    color: #1f2937;
+  }
+
+  .photo-display {
+    display: flex;
+    justify-content: center;
+    margin-bottom: 30px;
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+    overflow: hidden;
+  }
+
+  .photo-image {
+    max-width: 100%;
+    height: auto;
+    display: block;
+  }
+
+  .photo-info {
+    background: white;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    margin-bottom: 30px;
+  }
+
+  .info-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 8px 0;
+    border-bottom: 1px solid #f3f4f6;
+  }
+
+  .info-item:last-child {
+    border-bottom: none;
+  }
+
+  .info-label {
+    font-weight: 600;
+    color: #374151;
+  }
+
+  .info-value {
+    color: #6b7280;
+    font-family: 'Monaco', 'Menlo', monospace;
+    font-size: 0.875rem;
+  }
+
+  .photo-actions {
+    display: flex;
+    gap: 16px;
+    justify-content: center;
+    flex-wrap: wrap;
+  }
+
+  .action-btn {
+    padding: 12px 24px;
+    border-radius: 6px;
+    font-size: 0.875rem;
+    font-weight: 600;
+    text-decoration: none;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    border: none;
+    font-family: inherit;
+  }
+
+  .action-btn.secondary {
+    background: #f3f4f6;
+    color: #374151;
+    border: 1px solid #d1d5db;
+  }
+
+  .action-btn.secondary:hover {
+    background: #e5e7eb;
+    border-color: #9ca3af;
+  }
+
+  .action-btn.primary {
+    background: #3b82f6;
+    color: white;
+  }
+
+  .action-btn.primary:hover:not(:disabled) {
+    background: #2563eb;
+    transform: translateY(-1px);
+  }
+
+  .action-btn:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+  }
+
+  @media (max-width: 768px) {
+    .photo-title {
+      font-size: 1.875rem;
+    }
+    
+    .photo-actions {
+      flex-direction: column;
+    }
+    
+    .action-btn {
+      width: 100%;
+      text-align: center;
+    }
+  }
+</style>
