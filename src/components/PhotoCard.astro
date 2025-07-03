@@ -5,11 +5,12 @@ export interface Props {
   src: string;
   slug: string;
   title: string;
+  filename: string;
   width?: number;
   height?: number;
 }
 
-const { src, slug, title, width = 300, height = 300 } = Astro.props;
+const { src, slug, title, filename, width = 300, height = 300 } = Astro.props;
 ---
 
 <div class="photo-card">
@@ -30,6 +31,7 @@ const { src, slug, title, width = 300, height = 300 } = Astro.props;
         type="checkbox"
         class="photo-select"
         data-slug={slug}
+        data-filename={filename}
         id={`select-${slug}`}
       />
       <label for={`select-${slug}`} class="select-label">

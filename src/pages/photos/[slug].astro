@@ -68,16 +68,13 @@ if (!photo) {
       btn.textContent = 'Downloading...';
       btn.disabled = true;
       
-      const response = await fetch('/api/zip', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ files: [filename] }),
-      });
+      // For single photo downloads, directly download the original file
+      const photoUrl = `/photos/${filename}`;
+      
+      const response = await fetch(photoUrl);
       
       if (!response.ok) {
-        throw new Error('Failed to download');
+        throw new Error('Failed to download original photo');
       }
       
       const blob = await response.blob();

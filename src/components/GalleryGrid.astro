@@ -5,6 +5,7 @@ export interface Photo {
   slug: string;
   src: string;
   title: string;
+  filename: string;
   width?: number;
   height?: number;
 }
@@ -34,6 +35,7 @@ const { photos } = Astro.props;
         src={photo.src}
         slug={photo.slug}
         title={photo.title}
+        filename={photo.filename}
         width={photo.width}
         height={photo.height}
       />
@@ -42,8 +44,8 @@ const { photos } = Astro.props;
 </div>
 
 <script>
-  // Selection state management
-  const selectedPhotos = new Set<string>();
+  // Selection state management  
+  const selectedPhotos = new Set<string>(); // stores filenames
   
   // DOM elements
   const selectAllBtn = document.getElementById('select-all') as HTMLButtonElement;
@@ -68,14 +70,14 @@ const { photos } = Astro.props;
   checkboxes.forEach(checkbox => {
     checkbox.addEventListener('change', (e) => {
       const target = e.target as HTMLInputElement;
-      const slug = target.dataset.slug;
+      const filename = target.dataset.filename;
       
-      if (!slug) return;
+      if (!filename) return;
       
       if (target.checked) {
-        selectedPhotos.add(slug);
+        selectedPhotos.add(filename);
       } else {
-        selectedPhotos.delete(slug);
+        selectedPhotos.delete(filename);
       }
       
       updateUI();
@@ -86,8 +88,8 @@ const { photos } = Astro.props;
   selectAllBtn.addEventListener('click', () => {
     checkboxes.forEach(checkbox => {
       checkbox.checked = true;
-      const slug = checkbox.dataset.slug;
-      if (slug) selectedPhotos.add(slug);
+      const filename = checkbox.dataset.filename;
+      if (filename) selectedPhotos.add(filename);
     });
     updateUI();
   });
@@ -96,8 +98,8 @@ const { photos } = Astro.props;
   deselectAllBtn.addEventListener('click', () => {
     checkboxes.forEach(checkbox => {
       checkbox.checked = false;
-      const slug = checkbox.dataset.slug;
-      if (slug) selectedPhotos.delete(slug);
+      const filename = checkbox.dataset.filename;
+      if (filename) selectedPhotos.delete(filename);
     });
     selectedPhotos.clear();
     updateUI();
