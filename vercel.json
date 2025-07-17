@@ -1,0 +1,7 @@
+{
+  "functions": {
+    "dist/server/entry.mjs": {
+      "excludeFiles": "public/photos/**"
+    }
+  }
+}
