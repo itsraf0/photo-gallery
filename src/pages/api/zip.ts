@@ -1,5 +1,7 @@
 import type { APIRoute } from 'astro';
 import archiver from 'archiver';
+import fs from 'fs';
+import path from 'path';
 
 export const POST: APIRoute = async ({ request }) => {
   try {
@@ -56,28 +58,26 @@ export const POST: APIRoute = async ({ request }) => {
       rejectPromise(err);
     });
 
-    // Add files to archive by fetching them from the public URL
-    const baseUrl = new URL(request.url).origin;
+    // Add files to archive
+    const photosDir = path.join(process.cwd(), 'public', 'photos');
     
     for (const filename of files) {
-      try {
-        // Fetch file from public URL instead of filesystem
-        const photoUrl = `${baseUrl}/photos/${filename}`;
-        const response = await fetch(photoUrl);
-        
-        if (!response.ok) {
-          console.warn('Failed to fetch photo:', filename);
-          continue;
-        }
-        
-        const buffer = await response.arrayBuffer();
-        
-        // Add file to archive
-        archive.append(Buffer.from(buffer), { name: filename });
-      } catch (error) {
-        console.warn('Error processing file:', filename, error);
+      const filePath = path.join(photosDir, filename);
+      
+      // Security check: ensure file is in photos directory
+      if (!filePath.startsWith(photosDir)) {
+        console.warn('Attempted path traversal:', filename);
         continue;
       }
+      
+      // Check if file exists
+      if (!fs.existsSync(filePath)) {
+        console.warn('File not found:', filePath);
+        continue;
+      }
+      
+      // Add file to archive
+      archive.file(filePath, { name: filename });
     }
 
     // Finalize the archive
