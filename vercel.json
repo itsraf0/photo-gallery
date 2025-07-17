@@ -1,0 +1,10 @@
+{
+  "functions": {
+    "src/pages/**/*.astro": {
+      "excludeFiles": "public/photos/**"
+    },
+    "src/pages/api/**/*.ts": {
+      "excludeFiles": "public/photos/**"
+    }
+  }
+}
