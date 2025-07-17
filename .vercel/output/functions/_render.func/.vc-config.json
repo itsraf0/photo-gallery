@@ -1,5 +1,0 @@
-{
-	"handler": "dist/server/entry.mjs",
-	"launcherType": "Nodejs",
-	"supportsResponseStreaming": true
-}

@@ -1,8 +1,0 @@
-{
-  "buildCommand": "npm run build",
-  "functions": {
-    "_render": {
-      "excludeFiles": "public/photos/**"
-    }
-  }
-}

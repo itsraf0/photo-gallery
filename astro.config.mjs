@@ -10,8 +10,6 @@ export default defineConfig({
     imagesConfig: {
       sizes: [320, 640, 1280],
       domains: []
-    },
-    functionPerRoute: false,
-    edgeMiddleware: false
+    }
   })
 });

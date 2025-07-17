@@ -4,14 +4,12 @@
   "version": "0.0.1",
   "scripts": {
     "dev": "astro dev",
-    "build": "node ./scripts/build-for-vercel.js",
-    "build:local": "node ./scripts/generate-photo-manifest.js && astro build",
+    "build": "astro build",
     "preview": "astro preview",
-    "astro": "astro",
-    "generate-manifest": "node ./scripts/generate-photo-manifest.js"
+    "astro": "astro"
   },
   "dependencies": {
-    "@astrojs/vercel": "^8.2.2",
+    "@astrojs/vercel": "^8.2.0",
     "@types/archiver": "^6.0.3",
     "archiver": "^7.0.1",
     "astro": "^5.10.2",

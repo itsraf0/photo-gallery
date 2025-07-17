@@ -61,14 +61,6 @@ export const POST: APIRoute = async ({ request }) => {
     // Add files to archive
     const photosDir = path.join(process.cwd(), 'public', 'photos');
     
-    // Check if photos directory exists
-    if (!fs.existsSync(photosDir)) {
-      return new Response(
-        JSON.stringify({ error: 'Photos directory not found. Photos may have been moved to external storage.' }),
-        { status: 404, headers: { 'Content-Type': 'application/json' } }
-      );
-    }
-    
     for (const filename of files) {
       const filePath = path.join(photosDir, filename);
       
