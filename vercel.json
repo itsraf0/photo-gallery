@@ -1,7 +1,5 @@
 {
-  "functions": {
-    "src/pages/api/**": {
-      "excludeFiles": "{public/photos}/**"
-    }
-  }
+  "buildCommand": "astro build",
+  "outputDirectory": ".vercel/output",
+  "ignoreCommand": "git diff --quiet HEAD^ HEAD ./"
 }
