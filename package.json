@@ -4,7 +4,8 @@
   "version": "0.0.1",
   "scripts": {
     "dev": "astro dev",
-    "build": "node ./scripts/generate-photo-manifest.js && astro build",
+    "build": "node ./scripts/build-for-vercel.js",
+    "build:local": "node ./scripts/generate-photo-manifest.js && astro build",
     "preview": "astro preview",
     "astro": "astro",
     "generate-manifest": "node ./scripts/generate-photo-manifest.js"

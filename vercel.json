@@ -1,7 +1,9 @@
 {
+  "buildCommand": "npm run build",
   "functions": {
-    "dist/server/entry.mjs": {
-      "excludeFiles": "public/photos/**"
+    "_render": {
+      "excludeFiles": "public/photos/**",
+      "runtime": "nodejs18.x"
     }
   }
 }

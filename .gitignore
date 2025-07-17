@@ -21,6 +21,7 @@ pnpm-debug.log*
 
 # generated files
 src/data/photo-manifest.json
+temp_photos/
 .DS_Store
 
 # jetbrains setting folder
