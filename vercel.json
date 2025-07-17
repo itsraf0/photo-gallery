@@ -2,8 +2,7 @@
   "buildCommand": "npm run build",
   "functions": {
     "_render": {
-      "excludeFiles": "public/photos/**",
-      "runtime": "nodejs18.x"
+      "excludeFiles": "public/photos/**"
     }
   }
 }
